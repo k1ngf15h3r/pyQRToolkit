@@ -1,35 +1,83 @@
-import qrcode
+import sys
+
+from PyQt6.QtWidgets import QApplication, QWidget,  QFormLayout, QGridLayout, QTabWidget, QLineEdit, QDateEdit, QPushButton
+from PyQt6.QtCore import Qt
+
+import segno
 import vobject
 
-name = input("Enter your name: ")
-email = input("Enter your email: ")
-phone = input("Enter your mobile phone number: ")
-street = input("Enter your street: ")
-city = input("Enter your city: ")
-code = input("Enter your code: ")
+class MainWindow(QWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-# Create a vCard
-vcard = vobject.vCard()
-vcard.add('fn').value = name
-vcard.add('email').value = email
-vcard.add('tel').value = vobject.vcard.Telephone(phone=phone, type='cell')
-vcard.add('adr').value = vobject.vcard.Address(street=street , code=code, city=city)
+        self.setWindowTitle("QR Code Generator")
 
-# Convert vCard to string
-vcard_string = vcard.serialize()
+        main_layout = QGridLayout(self)
+        self.setLayout(main_layout)
 
-# Generate a QR code
-qr = qrcode.QRCode(
-    version=1,
-    error_correction=qrcode.constants.ERROR_CORRECT_L,
-    box_size=10,
-    border=4,
-)
-qr.add_data(vcard_string)
-qr.make(fit=True)
+        # create a tab widget
+        tabs = QTabWidget(
+            self, 
+            movable=True, 
+            tabShape=QTabWidget.TabShape.Rounded,
+            tabPosition=QTabWidget.TabPosition.North
+        )
 
-# Create an image from the QR Code instance
-img = qr.make_image(fill='black', back_color='white')
 
-# Save the image to a file
-img.save("qrcode.png")
+        # personal page
+        personal_page = QWidget(self)
+        layout = QFormLayout()
+        personal_page.setLayout(layout)
+        layout.addRow('First Name:', QLineEdit(self))
+        layout.addRow('Last Name:', QLineEdit(self))
+        layout.addRow('DOB:', QDateEdit(self))
+
+        # contact page
+        contact_page = QWidget(self)
+        layout = QFormLayout()
+        contact_page.setLayout(layout)
+        layout.addRow('Phone Number:', QLineEdit(self))
+        layout.addRow('Email Address:', QLineEdit(self))
+
+        # add page to the tab widget
+        tabs.addTab(personal_page, 'Personal Info')
+        tabs.addTab(contact_page, 'Contact Info')
+
+        main_layout.addWidget(tabs, 0, 0, 2, 1)
+        main_layout.addWidget(QPushButton('Save'), 2, 0, alignment=Qt.AlignmentFlag.AlignLeft)
+        main_layout.addWidget(QPushButton('Cancel'), 2, 0, alignment=Qt.AlignmentFlag.AlignRight)
+
+        self.show()
+
+    def make_vcard_qr_code():
+        name = input("Enter your name: ")
+        email = input("Enter your email: ")
+        phone = input("Enter your mobile phone number: ")
+        street = input("Enter your street: ")
+        city = input("Enter your city: ")
+        code = input("Enter your code: ")
+
+        # Create a vCard
+        vcard = vobject.vCard()
+        if(name):
+            vcard.add('fn').value = name
+        if(email):
+            vcard.add('email').value = email
+        if(phone):
+            vcard.add('tel')
+            vcard.tel.type_param = 'cell'
+            vcard.tel.value = phone
+        if(street and city and code):
+            vcard.add('adr').value = vobject.vcard.Address(street=street , code=code, city=city)
+
+        # Convert vCard to string
+        vcard_string = vcard.serialize()
+
+        # Generate a segno QR code
+        qrcode = segno.make(vcard_string)
+        qrcode.save("qrcode.png", scale=10)
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    sys.exit(app.exec())
