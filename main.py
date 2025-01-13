@@ -71,11 +71,12 @@ class MainWindow(QWidget):
         if(tabIndex == 0):
             self.make_vcard_qr_code(
                 name = str(self.vornameLine.text() + " " + self.nachnameLine.text()),
-                email = self.emailLine.text(),
-                phone = self.handyLine.text(),
                 street = self.strasseLine.text(),
-                city = self.ortLine.text(),
                 code = self.plzLine.text(),
+                city = self.ortLine.text(),
+                phone = self.handyLine.text(),
+                email = self.emailLine.text(),
+                website = self.websiteLine.text(),
             )
 
     def make_vcard_qr_code(self, **kwargs):
