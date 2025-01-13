@@ -25,12 +25,17 @@ class MainWindow(QWidget):
 
 
         # personal page
-        personal_page = QWidget(self)
+        vcard_page = QWidget(self)
         layout = QFormLayout()
-        personal_page.setLayout(layout)
-        layout.addRow('First Name:', QLineEdit(self))
-        layout.addRow('Last Name:', QLineEdit(self))
-        layout.addRow('DOB:', QDateEdit(self))
+        vcard_page.setLayout(layout)
+        layout.addRow('Vorname:', QLineEdit(self))
+        layout.addRow('Nachname:', QLineEdit(self))
+        layout.addRow('Strasse:', QLineEdit(self))
+        layout.addRow('PLZ:', QLineEdit(self))
+        layout.addRow('Ort:', QLineEdit(self))
+        layout.addRow('Handy:', QLineEdit(self))
+        layout.addRow('E-Mail:', QLineEdit(self))
+        layout.addRow('Website:', QLineEdit(self))
 
         # contact page
         contact_page = QWidget(self)
@@ -40,7 +45,7 @@ class MainWindow(QWidget):
         layout.addRow('Email Address:', QLineEdit(self))
 
         # add page to the tab widget
-        tabs.addTab(personal_page, 'Personal Info')
+        tabs.addTab(vcard_page, 'VCARD')
         tabs.addTab(contact_page, 'Contact Info')
 
         main_layout.addWidget(tabs, 0, 0, 2, 1)
