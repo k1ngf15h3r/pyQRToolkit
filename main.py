@@ -1,7 +1,7 @@
 import sys
 
-from PyQt6.QtGui import QPixmap
-from PyQt6.QtWidgets import QApplication, QWidget, QFormLayout, QGridLayout, QTabWidget, QLineEdit, QDateEdit, QPushButton, QLabel
+from PyQt6.QtGui import QPixmap, QCursor
+from PyQt6.QtWidgets import QApplication, QWidget, QFormLayout, QGridLayout, QTabWidget, QLineEdit, QDateEdit, QPushButton, QLabel, QMenu
 from PyQt6.QtCore import Qt
 
 import segno
@@ -67,10 +67,12 @@ class MainWindow(QWidget):
         self.label = QLabel(self)
         self.label.setBaseSize(300, 300)
         self.label.setText("QR Code")
+        self.label.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
 
         generateBtn = QPushButton('Generate')
         generateBtn.clicked.connect(self.get_tab_index)
         cancelBtn = QPushButton('Cancel')
+        cancelBtn.clicked.connect(sys.exit)
 
         # add page to the tab widget
         self.tabs.addTab(vcard_page, 'VCARD')
@@ -82,6 +84,28 @@ class MainWindow(QWidget):
         self.main_layout.addWidget(self.label, 2, 0, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.show()
+
+    def on_qr_code_context_menu(self):
+        menu = QMenu(self)
+        copy_action = menu.addAction("Copy to Clipboard")
+        save_action = menu.addAction("Save As")
+        
+        menu.popup(QCursor.pos())
+        action = menu.exec()
+
+        if action == copy_action:
+            self.copy_to_clipboard()
+        elif action == save_action:
+            self.save_as()
+
+    def copy_to_clipboard(self):
+        QApplication.clipboard().setPixmap(self.label.pixmap())
+        print("Copy to clipboard")
+        pass
+
+    def save_as(self):
+        print("Save as")
+        pass
 
     def get_tab_index(self):
         tabIndex = self.tabs.currentIndex()
@@ -143,6 +167,7 @@ class MainWindow(QWidget):
         self.label.setPixmap(pixmap)
 
         print("Vcard QR Code generated successfully!")
+        self.label.customContextMenuRequested.connect(self.on_qr_code_context_menu)
 
     def make_invoice_qr_code(self, **kwargs):
         empfaenger = kwargs.get('empfaenger')
@@ -164,6 +189,7 @@ class MainWindow(QWidget):
         self.label.setPixmap(pixmap)
 
         print("Invoice QR Code generated successfully!")
+        self.label.customContextMenuRequested.connect(self.on_qr_code_context_menu)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
