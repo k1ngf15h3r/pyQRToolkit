@@ -1,7 +1,7 @@
 import sys
 
 from PyQt6.QtGui import QPixmap, QCursor
-from PyQt6.QtWidgets import QApplication, QWidget, QFormLayout, QGridLayout, QTabWidget, QLineEdit, QDateEdit, QPushButton, QLabel, QMenu
+from PyQt6.QtWidgets import QApplication, QWidget, QFormLayout, QGridLayout, QTabWidget, QLineEdit, QDateEdit, QPushButton, QLabel, QMenu, QMessageBox
 from PyQt6.QtCore import Qt
 
 import segno
@@ -110,23 +110,39 @@ class MainWindow(QWidget):
     def get_tab_index(self):
         tabIndex = self.tabs.currentIndex()
         if(tabIndex == 0):
-            self.make_vcard_qr_code(
-                name = str(self.vornameLine.text() + " " + self.nachnameLine.text()),
-                dob = self.dateofbirth.date().toString("yyyy-MM-dd"),
-                street = self.strasseLine.text(),
-                code = self.plzLine.text(),
-                city = self.ortLine.text(),
-                phone = self.handyLine.text(),
-                email = self.emailLine.text(),
-                website = self.websiteLine.text(),
-            )
+            if(self.vornameLine.text() == "" or self.nachnameLine.text() == ""):
+                msgBox = QMessageBox(self)
+                msgBox.setText("Vorname und Nachname sind mindestens erforderlich!");
+                msgBox.setWindowTitle("Warnung")
+                msgBox.setIcon(QMessageBox.Icon.Warning)
+                msgBox.exec();
+                print("Please fill all the required fields!")
+            else:
+                self.make_vcard_qr_code(
+                    name = str(self.vornameLine.text() + " " + self.nachnameLine.text()),
+                    dob = self.dateofbirth.date().toString("yyyy-MM-dd"),
+                    street = self.strasseLine.text(),
+                    code = self.plzLine.text(),
+                    city = self.ortLine.text(),
+                    phone = self.handyLine.text(),
+                    email = self.emailLine.text(),
+                    website = self.websiteLine.text(),
+                )
         if(tabIndex == 1):
-            self.make_invoice_qr_code(
-                empfaenger = self.empfaenger.text(),
-                iban = self.iban.text(),
-                betrag = self.betrag.text(),
-                verwendungszweck = self.verwendungszweck.text()
-            )
+            if(self.empfaenger.text() == "" or self.iban.text() == "" or self.betrag.text() == "" or self.verwendungszweck.text() == ""):
+                msgBox = QMessageBox(self)
+                msgBox.setText("Alle Felder müssen ausgefüllt sein!");
+                msgBox.setWindowTitle("Warnung")
+                msgBox.setIcon(QMessageBox.Icon.Warning)
+                msgBox.exec();
+                print("Please fill all the required fields!")
+            else:
+                self.make_invoice_qr_code(
+                    empfaenger = self.empfaenger.text(),
+                    iban = self.iban.text(),
+                    betrag = self.betrag.text(),
+                    verwendungszweck = self.verwendungszweck.text()
+                )
 
     def make_vcard_qr_code(self, **kwargs):
         name = kwargs.get('name')
