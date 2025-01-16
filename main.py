@@ -112,10 +112,10 @@ class MainWindow(QWidget):
         if(tabIndex == 0):
             if(self.vornameLine.text() == "" or self.nachnameLine.text() == ""):
                 msgBox = QMessageBox(self)
-                msgBox.setText("Vorname und Nachname sind mindestens erforderlich!");
+                msgBox.setText("Vorname und Nachname sind mindestens erforderlich!")
                 msgBox.setWindowTitle("Warnung")
                 msgBox.setIcon(QMessageBox.Icon.Warning)
-                msgBox.exec();
+                msgBox.exec()
                 print("Please fill all the required fields!")
             else:
                 self.make_vcard_qr_code(
@@ -131,10 +131,10 @@ class MainWindow(QWidget):
         if(tabIndex == 1):
             if(self.empfaenger.text() == "" or self.iban.text() == "" or self.betrag.text() == "" or self.verwendungszweck.text() == ""):
                 msgBox = QMessageBox(self)
-                msgBox.setText("Alle Felder müssen ausgefüllt sein!");
+                msgBox.setText("Alle Felder müssen ausgefüllt sein!")
                 msgBox.setWindowTitle("Warnung")
                 msgBox.setIcon(QMessageBox.Icon.Warning)
-                msgBox.exec();
+                msgBox.exec()
                 print("Please fill all the required fields!")
             else:
                 self.make_invoice_qr_code(
