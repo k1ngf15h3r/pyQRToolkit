@@ -1,9 +1,10 @@
 import sys
 
 from PyQt6.QtGui import QPixmap, QCursor
-from PyQt6.QtWidgets import QApplication, QWidget, QFormLayout, QGridLayout, QTabWidget, QLineEdit, QDateEdit, QPushButton, QLabel, QMenu, QMessageBox
+from PyQt6.QtWidgets import QApplication, QWidget, QFormLayout, QGridLayout, QTabWidget, QLineEdit, QDateEdit, QPushButton, QLabel, QMenu, QMessageBox, QCalendarWidget
 from PyQt6.QtCore import Qt
 
+import datetime
 import segno
 import segno.helpers
 import vobject
@@ -27,8 +28,14 @@ class MainWindow(QWidget):
 
         self.vornameLine = QLineEdit(self)
         self.nachnameLine = QLineEdit(self)
-        self.dateofbirth = QDateEdit(self)
-        self.dateofbirth.setDate(self.dateofbirth.date().addYears(-18))
+        self.dateofbirth = QCalendarWidget(
+            self, 
+            gridVisible=True, 
+            selectedDate=datetime.datetime.now(), 
+            firstDayOfWeek=Qt.DayOfWeek.Monday
+        )
+        #self.dateofbirth = QDateEdit(datetime.datetime.now())
+        
         self.strasseLine = QLineEdit(self)
         self.plzLine = QLineEdit(self)
         self.ortLine = QLineEdit(self)
@@ -120,7 +127,7 @@ class MainWindow(QWidget):
             else:
                 self.make_vcard_qr_code(
                     name = str(self.vornameLine.text() + " " + self.nachnameLine.text()),
-                    dob = self.dateofbirth.date().toString("yyyy-MM-dd"),
+                    dob = self.dateofbirth.selectedDate().toString("yyyy-MM-dd"),
                     street = self.strasseLine.text(),
                     code = self.plzLine.text(),
                     city = self.ortLine.text(),
