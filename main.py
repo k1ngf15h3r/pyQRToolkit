@@ -1,13 +1,14 @@
 import sys
 
 from PyQt6.QtGui import QPixmap, QCursor
-from PyQt6.QtWidgets import QApplication, QWidget, QFormLayout, QGridLayout, QTabWidget, QLineEdit, QDateEdit, QPushButton, QLabel, QMenu, QMessageBox, QCalendarWidget
+from PyQt6.QtWidgets import QApplication, QWidget, QFormLayout, QGridLayout, QTabWidget, QLineEdit, QDateEdit, QPushButton, QLabel, QMenu, QMessageBox, QCalendarWidget, QCheckBox
 from PyQt6.QtCore import Qt
 
 import datetime
 import segno
 import segno.helpers
 import vobject
+from dotenv import load_dotenv, find_dotenv, dotenv_values, set_key
 
 class MainWindow(QWidget):
     def __init__(self, *args, **kwargs):
@@ -71,6 +72,10 @@ class MainWindow(QWidget):
         layout.addRow('Betrag:', self.betrag)
         layout.addRow('Verwendungszweck:', self.verwendungszweck)
 
+        self.save_env = QCheckBox(self)
+        self.save_env.setText("Werte speichern")
+        self.save_env.setChecked(False)
+
         self.label = QLabel(self)
         self.label.setBaseSize(300, 300)
         self.label.setText("QR Code")
@@ -86,9 +91,10 @@ class MainWindow(QWidget):
         self.tabs.addTab(invoice_page, 'Invoice')
 
         self.main_layout.addWidget(self.tabs, 0, 0, 2, 1)
-        self.main_layout.addWidget(generateBtn, 3, 0, alignment=Qt.AlignmentFlag.AlignLeft)
-        self.main_layout.addWidget(cancelBtn, 3, 0, alignment=Qt.AlignmentFlag.AlignRight)
-        self.main_layout.addWidget(self.label, 2, 0, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.main_layout.addWidget(self.save_env, 2, 0, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.main_layout.addWidget(generateBtn, 4, 0, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.main_layout.addWidget(cancelBtn, 4, 0, alignment=Qt.AlignmentFlag.AlignRight)
+        self.main_layout.addWidget(self.label, 3, 0, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.show()
 
@@ -152,6 +158,17 @@ class MainWindow(QWidget):
                 )
 
     def make_vcard_qr_code(self, **kwargs):
+        if(self.save_env.isChecked()):
+            set_key('.env', 'VCARD_VORNAME', self.vornameLine.text())
+            set_key('.env', 'VCARD_NACHNAME', self.nachnameLine.text())
+            set_key('.env', 'VCARD_DOB', self.dateofbirth.selectedDate().toString("yyyy-MM-dd"))
+            set_key('.env', 'VCARD_STREET', self.strasseLine.text())
+            set_key('.env', 'VCARD_CODE', self.plzLine.text())
+            set_key('.env', 'VCARD_CITY', self.ortLine.text())
+            set_key('.env', 'VCARD_PHONE', self.handyLine.text())
+            set_key('.env', 'VCARD_EMAIL', self.emailLine.text())
+            set_key('.env', 'VCARD_WEBSITE', self.websiteLine.text())
+
         name = kwargs.get('name')
         dob = kwargs.get('dob')
         email = kwargs.get('email')
