@@ -184,7 +184,7 @@ class MainWindow(QWidget):
 
         # Generate a segno QR code
         qrcode = segno.make(vcard_string)
-        qrcode.save("vcard_qrcode.png", scale=10)
+        qrcode.save("vcard_qrcode.png", scale=3)
 
         pixmap = QPixmap('vcard_qrcode.png')
         self.label.setPixmap(pixmap)
