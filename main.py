@@ -27,19 +27,15 @@ class MainWindow(QWidget):
             tabPosition=QTabWidget.TabPosition.North
         )
 
+        self.firmaLine = QLineEdit(self)
+        self.positionLine = QLineEdit(self)
         self.vornameLine = QLineEdit(self)
         self.nachnameLine = QLineEdit(self)
-        self.dateofbirth = QCalendarWidget(
-            self, 
-            gridVisible=True, 
-            selectedDate=datetime.datetime.now(), 
-            firstDayOfWeek=Qt.DayOfWeek.Monday
-        )
-        #self.dateofbirth = QDateEdit(datetime.datetime.now())
-        
         self.strasseLine = QLineEdit(self)
         self.plzLine = QLineEdit(self)
         self.ortLine = QLineEdit(self)
+        self.telefonLine = QLineEdit(self)
+        self.faxLine = QLineEdit(self)
         self.handyLine = QLineEdit(self)
         self.emailLine = QLineEdit(self)
         self.websiteLine = QLineEdit(self)
@@ -48,12 +44,15 @@ class MainWindow(QWidget):
         vcard_page = QWidget(self)
         layout = QFormLayout()
         vcard_page.setLayout(layout)
+        layout.addRow('Firma:', self.firmaLine)
+        layout.addRow('Position:', self.positionLine)
         layout.addRow('Vorname:', self.vornameLine)
         layout.addRow('Nachname:', self.nachnameLine)
-        layout.addRow('Geburtsdatum:', self.dateofbirth)
         layout.addRow('Strasse', self.strasseLine)
         layout.addRow('PLZ:', self.plzLine)
         layout.addRow('Ort:', self.ortLine)
+        layout.addRow('Telefon:', self.telefonLine)
+        layout.addRow('Fax:', self.faxLine)
         layout.addRow('Handy:', self.handyLine)
         layout.addRow('E-Mail:', self.emailLine)
         layout.addRow('Website:', self.websiteLine)
@@ -96,7 +95,32 @@ class MainWindow(QWidget):
         self.main_layout.addWidget(cancelBtn, 4, 0, alignment=Qt.AlignmentFlag.AlignRight)
         self.main_layout.addWidget(self.label, 3, 0, alignment=Qt.AlignmentFlag.AlignCenter)
 
+        self.check_env()
+
         self.show()
+
+    def check_env(self):
+        env_values = dotenv_values('.env')
+        if(env_values):
+            try:
+                self.firmaLine.setText(env_values['VCARD_FIRMA'])
+                self.positionLine.setText(env_values['VCARD_POSITION'])
+                self.vornameLine.setText(env_values['VCARD_VORNAME'])
+                self.nachnameLine.setText(env_values['VCARD_NACHNAME'])
+                self.strasseLine.setText(env_values['VCARD_STREET'])
+                self.plzLine.setText(env_values['VCARD_CODE'])
+                self.ortLine.setText(env_values['VCARD_CITY'])
+                self.telefonLine.setText(env_values['VCARD_TELEFON'])
+                self.faxLine.setText(env_values['VCARD_FAX'])
+                self.handyLine.setText(env_values['VCARD_PHONE'])
+                self.emailLine.setText(env_values['VCARD_EMAIL'])
+                self.websiteLine.setText(env_values['VCARD_WEBSITE'])
+                self.empfaenger.setText(env_values['INVOICE_EMPFAENGER'])
+                self.iban.setText(env_values['INVOICE_IBAN'])
+                self.betrag.setText(env_values['INVOICE_BETRAG'])
+                self.verwendungszweck.setText(env_values['INVOICE_VERWENDUNGSZWECK'])
+            except KeyError as e:
+                print(f"KeyError: {e}")
 
     def on_qr_code_context_menu(self):
         menu = QMenu(self)
@@ -132,12 +156,15 @@ class MainWindow(QWidget):
                 print("Please fill all the required fields!")
             else:
                 self.make_vcard_qr_code(
+                    firma = self.firmaLine.text(),
+                    position = self.positionLine.text(),
                     name = str(self.vornameLine.text() + " " + self.nachnameLine.text()),
-                    dob = self.dateofbirth.selectedDate().toString("yyyy-MM-dd"),
                     street = self.strasseLine.text(),
                     code = self.plzLine.text(),
                     city = self.ortLine.text(),
-                    phone = self.handyLine.text(),
+                    phone = self.telefonLine.text(),
+                    fax = self.faxLine.text(),
+                    mobile = self.handyLine.text(),
                     email = self.emailLine.text(),
                     website = self.websiteLine.text(),
                 )
@@ -159,20 +186,26 @@ class MainWindow(QWidget):
 
     def make_vcard_qr_code(self, **kwargs):
         if(self.save_env.isChecked()):
+            set_key('.env', 'VCARD_FIRMA', self.firmaLine.text())
+            set_key('.env', 'VCARD_POSITION', self.positionLine.text())
             set_key('.env', 'VCARD_VORNAME', self.vornameLine.text())
             set_key('.env', 'VCARD_NACHNAME', self.nachnameLine.text())
-            set_key('.env', 'VCARD_DOB', self.dateofbirth.selectedDate().toString("yyyy-MM-dd"))
             set_key('.env', 'VCARD_STREET', self.strasseLine.text())
             set_key('.env', 'VCARD_CODE', self.plzLine.text())
             set_key('.env', 'VCARD_CITY', self.ortLine.text())
+            set_key('.env', 'VCARD_TELEFON', self.telefonLine.text())
+            set_key('.env', 'VCARD_FAX', self.faxLine.text())
             set_key('.env', 'VCARD_PHONE', self.handyLine.text())
             set_key('.env', 'VCARD_EMAIL', self.emailLine.text())
             set_key('.env', 'VCARD_WEBSITE', self.websiteLine.text())
 
+        firma = kwargs.get('firma')
+        position = kwargs.get('position')
         name = kwargs.get('name')
-        dob = kwargs.get('dob')
         email = kwargs.get('email')
         phone = kwargs.get('phone')
+        fax = kwargs.get('fax')
+        mobile = kwargs.get('mobile')
         street = kwargs.get('street')
         city = kwargs.get('city')
         code = kwargs.get('code')
@@ -180,16 +213,23 @@ class MainWindow(QWidget):
 
         # Create a vCard
         vcard = vobject.vCard()
+        if(firma):
+            vcard.add('org').value = firma
+        if(position):
+            vcard.add('title').value = position
         if(name):
             vcard.add('fn').value = name
-        if(dob):
-            vcard.add('bday').value = dob
         if(street and city and code):
             vcard.add('adr').value = vobject.vcard.Address(street=street , code=code, city=city)
         if(phone):
-            vcard.add('tel')
+            vcard.add('tel').value = phone
+            vcard.tel.type_param = 'work'
+        if(fax):
+            vcard.add('tel').value = fax
+            vcard.tel.type_param = 'fax'
+        if(mobile):
+            vcard.add('tel').value = phone
             vcard.tel.type_param = 'cell'
-            vcard.tel.value = phone
         if(email):
             vcard.add('email').value = email
         if(website):
@@ -210,6 +250,12 @@ class MainWindow(QWidget):
         self.label.customContextMenuRequested.connect(self.on_qr_code_context_menu)
 
     def make_invoice_qr_code(self, **kwargs):
+        if(self.save_env.isChecked()):
+            set_key('.env', 'INVOICE_EMPFAENGER', self.empfaenger.text())
+            set_key('.env', 'INVOICE_IBAN', self.iban.text())
+            set_key('.env', 'INVOICE_BETRAG', self.betrag.text())
+            set_key('.env', 'INVOICE_VERWENDUNGSZWECK', self.verwendungszweck.text())
+
         empfaenger = kwargs.get('empfaenger')
         iban = kwargs.get('iban')
         betrag = kwargs.get('betrag')
